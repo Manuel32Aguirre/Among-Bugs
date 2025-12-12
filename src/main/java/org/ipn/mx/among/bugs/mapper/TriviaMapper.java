@@ -1,6 +1,5 @@
 package org.ipn.mx.among.bugs.mapper;
 
-import java.util.stream.Collectors;
 import org.ipn.mx.among.bugs.domain.dto.request.trivia.CreateTriviaRequest;
 import org.ipn.mx.among.bugs.domain.dto.request.trivia.QuestionRequest;
 import org.ipn.mx.among.bugs.domain.dto.response.trivia.QuestionOptionResponse;
@@ -63,13 +62,6 @@ public class TriviaMapper {
 				.description(request.description())
 				.isPublic(request.isPublic())
 				.title(request.title())
-				/*.questions(
-						request
-								.questions()
-								.stream()
-								.map(TriviaMapper::toQuestionEntity)
-								.collect(Collectors.toSet())
-				)*/
 				.build();
 	}
 

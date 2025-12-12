@@ -1,5 +1,20 @@
 package org.ipn.mx.among.bugs.service.impl;
 
+import com.lowagie.text.Chunk;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+import java.awt.Color;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -100,6 +115,57 @@ public class TriviaServiceImpl implements TriviaService {
 	@Transactional(rollbackFor = Exception.class)
 	public void deleteTrivia(Long triviaId) {
 		triviaRepository.deleteById(triviaId);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public byte[] createPdfReport(Pageable pageable) {
+		var trivias = this.getAllPublicTrivia(pageable);
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+			Document document = new Document(PageSize.A4);
+			PdfWriter.getInstance(document, out);
+			document.open();
+			Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, Color.BLUE);
+			Paragraph title = new Paragraph("Trivia Report", fontTitle);
+			title.setAlignment(Element.ALIGN_CENTER);
+			document.add(title);
+			document.add(Chunk.NEWLINE);
+
+			PdfPTable table = new PdfPTable(5);
+			table.setWidthPercentage(100);
+			table.setWidths(new float[]{2f, 2f, 3f, 4f, 1.5f});
+
+			addTableHeader(table);
+
+			for (var t : trivias) {
+				table.addCell(String.valueOf(t.id()));
+				table.addCell(String.valueOf(t.targetScore()));
+				table.addCell(t.title());
+				table.addCell(t.description());
+				table.addCell(t.isPublic() ? "Yes" : "No");
+			}
+
+			document.add(table);
+			document.close();
+
+			return out.toByteArray();
+
+		} catch (DocumentException | IOException e) {
+			throw new RuntimeException("Error creating PDF", e);
+		}
+	}
+
+	private void addTableHeader(PdfPTable table) {
+		String[] headers = {"ID", "Score", "Title", "Description", "Public"};
+
+		for (String header : headers) {
+			PdfPCell headerCell = new PdfPCell();
+			headerCell.setBackgroundColor(Color.LIGHT_GRAY);
+			headerCell.setPhrase(new Phrase(header));
+			headerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+			table.addCell(headerCell);
+		}
 	}
 
 }

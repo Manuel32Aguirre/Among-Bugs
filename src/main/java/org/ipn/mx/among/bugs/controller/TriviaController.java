@@ -11,7 +11,10 @@ import org.ipn.mx.among.bugs.service.TriviaService;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +62,18 @@ public class TriviaController {
 	@GetMapping("/{playerId}")
 	public Set<TriviaResponse> getAllTriviaByPlayerId(@PathVariable Long playerId) {
 		return triviaService.getAllTriviaByPlayerId(playerId);
+	}
+
+	@GetMapping("/report")
+	public ResponseEntity<byte[]> createPdfReport(@ParameterObject @PageableDefault(sort = "title") Pageable pageable) {
+		byte[] pdfBytes = triviaService.createPdfReport(pageable);
+		HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=report.pdf");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
 	}
 
 }

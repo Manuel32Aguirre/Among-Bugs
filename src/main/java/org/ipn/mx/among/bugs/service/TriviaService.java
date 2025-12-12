@@ -8,6 +8,7 @@ import org.ipn.mx.among.bugs.domain.dto.response.trivia.TriviaWithQuestionsRespo
 import org.springframework.data.domain.Pageable;
 
 public interface TriviaService {
+	byte[] createPdfReport(Pageable pageable);
 	TriviaWithQuestionsResponse createTrivia(Long playerId, CreateTriviaRequest trivia);
 	TriviaWithQuestionsResponse updateTrivia(UpdateTriviaRequest trivia, Long triviaId);
 	Set<TriviaResponse> getAllTriviaByPlayerId(Long playerId);
